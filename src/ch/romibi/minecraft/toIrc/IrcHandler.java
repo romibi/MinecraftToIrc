@@ -26,6 +26,7 @@ public class IrcHandler implements IRCEventListener {
 	
 	private Map<String,Session> sessions;
 	private Map<String,ConnectionManager> managers;
+	private Map<String,String> usernameMappings;
 
 	public IrcHandler() {
 		/*
@@ -54,8 +55,16 @@ public class IrcHandler implements IRCEventListener {
 			e.getSession().join(channel);
 		} else if (e.getType() == Type.CHANNEL_MESSAGE) {
 			MessageEvent me = (MessageEvent) e;
+			parseChannelMessage(me);
 			if(e.getSession().equals(botSession) && !sessions.containsKey(me.getNick())){
 				McToIrc.sendToMc("<"+me.getNick() + "> " + me.getMessage());
+			}
+		} else if(e.getType() == Type.PRIVATE_MESSAGE) {
+			MessageEvent me = (MessageEvent) e;
+			if(e.getSession().equals(botSession)) {
+				parseBotRequeset(me);
+			} else {
+				McToIrc.sendCommandToMc("tell "+convertUsernameToMc(me.getSession().getNick())+" "+me.getNick()+" from IRC whispers: "+me.getMessage());
 			}
 		} else if (e.getType() == Type.JOIN_COMPLETE && e.getSession().equals(botSession)) {
 			JoinCompleteEvent jce = (JoinCompleteEvent) e;
@@ -67,6 +76,15 @@ public class IrcHandler implements IRCEventListener {
 
 	}
 	
+	private void parseChannelMessage(MessageEvent me) {
+		// TODO React on Channel Messages
+		
+	}
+
+	private void parseBotRequeset(MessageEvent me) {
+		// TODO React to Private Messages
+		
+	}
 
 	public void send(String string) {
 		//manager.getSessions().get(0).sayChannel(manager.getSessions().get(0).getChannel(nick), string);
