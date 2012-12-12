@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
 import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
@@ -172,8 +173,12 @@ public class IrcHandler implements IRCEventListener {
 		if(usernameMappings == null) {
 			return null;
 		}
-		if(usernameMappings.containsKey(username)) {
-			return usernameMappings.get(username);
+		if(usernameMappings.containsValue(username)) {
+			for (Entry<String, String> entry : usernameMappings.entrySet()) {
+				if(entry.getValue().equals(username)){
+					return entry.getKey();
+				}
+			}
 		}
 		return null;
 	}
