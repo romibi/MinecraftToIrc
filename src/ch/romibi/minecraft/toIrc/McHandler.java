@@ -58,6 +58,7 @@ public class McHandler extends Thread{
 	
 	private static void startMc() {
 		ProcessBuilder pb = new ProcessBuilder("java", "-Xmx1024M", "-Xms1024M", "-jar", "minecraft_server.jar", "nogui");
+		//TODO: move arguments to config
 		try {
 			mcProcess = pb.start();
 		} catch (IOException e) {
@@ -75,14 +76,14 @@ public class McHandler extends Thread{
 			McToIrc.sendToIrcAsUser(user, msg);
 		}
 		
-		Pattern userLoggedInPattern = Pattern.compile("\\d\\d\\d\\d-\\d\\d\\-\\d\\d\\W\\d\\d:\\d\\d\\:\\d\\d\\W\\[.*\\]\\W(.*)\\[.*\\]\\Wlogged\\ in.*");
+		Pattern userLoggedInPattern = Pattern.compile("\\d\\d\\d\\d-\\d\\d\\-\\d\\d\\W\\d\\d:\\d\\d\\:\\d\\d\\W\\[.*\\]\\W(.*)\\[.*\\]\\Wlogged\\ in.*"); //TODO: make better regex
 		Matcher userLoggedIn = userLoggedInPattern.matcher(cache);
 		if(userLoggedIn.matches()){
 			String user = userLoggedIn.group(1);
 			McToIrc.userLoggedIn(user);
 		}
 		
-		Pattern userLoggedOutPattern = Pattern.compile("\\d\\d\\d\\d-\\d\\d\\-\\d\\d\\W\\d\\d:\\d\\d\\:\\d\\d\\W\\[.*\\]\\W(.*)\\Wlost\\ connection.*");
+		Pattern userLoggedOutPattern = Pattern.compile("\\d\\d\\d\\d-\\d\\d\\-\\d\\d\\W\\d\\d:\\d\\d\\:\\d\\d\\W\\[.*\\]\\W(.*)\\Wlost\\ connection.*"); //TODO: make better regex
 		Matcher userLoggedOut = userLoggedOutPattern.matcher(cache);
 		if(userLoggedOut.matches()){
 			String user = userLoggedOut.group(1);
