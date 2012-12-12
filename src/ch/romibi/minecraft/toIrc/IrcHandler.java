@@ -76,7 +76,7 @@ public class IrcHandler implements IRCEventListener {
 	}
 	
 	public Session getSessionForUser(String user) {
-		user = convertUsername(user);
+		user = convertUsernameToIrc(user);
 		if(sessions == null) {
 			sessions = new HashMap<String, Session>();
 		}
@@ -113,12 +113,30 @@ public class IrcHandler implements IRCEventListener {
 	}
 
 	private void logoutUser(String user) {
-		sessions.get(convertUsername(user)).close("logged out");
-		sessions.remove(convertUsername(user));
+		sessions.get(convertUsernameToIrc(user)).close("logged out");
+		sessions.remove(convertUsernameToIrc(user));
 	}
 	
-	private String convertUsername(String username) {
-		return username.substring(0, trimNicksAt)+usersuffix;
+	private String convertUsernameToIrc(String username) {
+		if(usernameMappings == null) {
+			usernameMappings = new HashMap<String, String>();
+		}
+		if(usernameMappings.containsKey(username)) {
+			return usernameMappings.get(username);
+		} else {
+			usernameMappings.put(username, username.substring(0, trimNicksAt)+usersuffix);
+			return username.substring(0, trimNicksAt)+usersuffix;
+		}
+	}
+	
+	private String convertUsernameToMc(String username) {
+		if(usernameMappings == null) {
+			return null;
+		}
+		if(usernameMappings.containsKey(username)) {
+			return usernameMappings.get(username);
+		}
+		return null;
 	}
 
 	public void stop() {
