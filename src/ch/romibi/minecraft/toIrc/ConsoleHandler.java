@@ -27,7 +27,6 @@ public class ConsoleHandler extends Thread {
 				}
 			} catch (IOException e) {
 				exit = true;
-				//e.printStackTrace();
 			}
 			
 			// Sleep
@@ -35,7 +34,6 @@ public class ConsoleHandler extends Thread {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

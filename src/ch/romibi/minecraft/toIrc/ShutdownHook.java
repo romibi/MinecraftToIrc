@@ -9,7 +9,6 @@ public class ShutdownHook extends Thread{
 		try {
 			McToIrc.console.consoleReader.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -42,7 +42,6 @@ public class McHandler extends Thread{
 					
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -51,7 +50,6 @@ public class McHandler extends Thread{
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -63,7 +61,6 @@ public class McHandler extends Thread{
 		try {
 			mcProcess = pb.start();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

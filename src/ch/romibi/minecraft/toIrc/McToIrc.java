@@ -33,7 +33,6 @@ public class McToIrc {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -42,7 +41,6 @@ public class McToIrc {
 		try {
 			console.consoleReader.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -62,7 +60,6 @@ public class McToIrc {
 	}
 
 	public static void sendToIrcAsUser(String user, String msg) {
-		// TODO Auto-generated method stub
 		if(irc!=null) {
 			irc.sayAsUser(user, msg);
 		}

@@ -53,8 +53,6 @@ public class IrcHandler implements IRCEventListener {
 			e.getSession().join(channel);
 		} else if (e.getType() == Type.CHANNEL_MESSAGE) {
 			MessageEvent me = (MessageEvent) e;
-			//System.out.println(me.getNick() + ":" + me.getMessage());
-			//me.getChannel().say("Modes :" + me.getChannel().getUsersModes(me.getNick()).toString());
 			if(e.getSession().equals(botSession) && !sessions.containsKey(me.getNick())){
 				McToIrc.sendToMc("<"+me.getNick() + "> " + me.getMessage());
 			}
@@ -68,9 +66,6 @@ public class IrcHandler implements IRCEventListener {
 
 	}
 	
-	//public static void main(String[] args) {
-	//	new IrcHandler();
-	//}
 
 	public void send(String string) {
 		//manager.getSessions().get(0).sayChannel(manager.getSessions().get(0).getChannel(nick), string);
