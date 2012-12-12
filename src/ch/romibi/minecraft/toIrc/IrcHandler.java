@@ -135,7 +135,7 @@ public class IrcHandler implements IRCEventListener {
 		sessions.remove(convertUsernameToIrc(user));
 	}
 	
-	private String convertUsernameToIrc(String username) {
+	public String convertUsernameToIrc(String username) {
 		if(usernameMappings == null) {
 			usernameMappings = new HashMap<String, String>();
 		}
@@ -147,7 +147,7 @@ public class IrcHandler implements IRCEventListener {
 		}
 	}
 	
-	private String convertUsernameToMc(String username) {
+	public String convertUsernameToMc(String username) {
 		if(usernameMappings == null) {
 			return null;
 		}
