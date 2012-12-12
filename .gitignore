@@ -24,3 +24,7 @@ white-list.txt
 world*
 world/*
 server.properties
+doc
+doc/*
+libsrc
+libsrc/*
