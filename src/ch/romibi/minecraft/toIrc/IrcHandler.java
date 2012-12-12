@@ -1,7 +1,12 @@
 package ch.romibi.minecraft.toIrc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
+import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
 
 import jerklib.ConnectionManager;
 import jerklib.Profile;
@@ -27,8 +32,21 @@ public class IrcHandler implements IRCEventListener {
 	private Map<String,Session> sessions;
 	private Map<String,ConnectionManager> managers;
 	private Map<String,String> usernameMappings;
+	private List<MessageParser> publicParsers;
+	private List<MessageParser> privateParsers;
 
 	public IrcHandler() {
+		
+		publicParsers = new ArrayList<MessageParser>();
+		privateParsers = new ArrayList<MessageParser>();
+		
+		//Public Parsers
+		//TODO: Add more Public Parsers
+		
+		//Private Parsers
+		privateParsers.add(new EnableCaveMapping());
+		//TODO: Add more Private Parsers
+		
 		/*
 		 * ConnectionManager takes a Profile to use for new connections.
 		 */
@@ -47,6 +65,7 @@ public class IrcHandler implements IRCEventListener {
 		 * from a connected IRC server.
 		 */
 		botSession.addIRCEventListener(this);
+		
 	}
 
 	@Override
@@ -77,13 +96,15 @@ public class IrcHandler implements IRCEventListener {
 	}
 	
 	private void parseChannelMessage(MessageEvent me) {
-		// TODO React on Channel Messages
-		
+		for (MessageParser parser : publicParsers) {
+			parser.parse(me);
+		}
 	}
 
 	private void parseBotRequeset(MessageEvent me) {
-		// TODO React to Private Messages
-		
+		for (MessageParser parser : privateParsers) {
+			parser.parse(me);
+		}
 	}
 
 	public void send(String string) {
