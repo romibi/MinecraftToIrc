@@ -15,10 +15,11 @@ import jerklib.listeners.IRCEventListener;
 public class IrcHandler implements IRCEventListener {
 	
 	private String nick = "mcServer";
-	private String channel = "#romibi";
+	private String channel = "#channel";
 	private String server = "localhost";
 	private String usersuffix = "MC";
 	private int trimNicksAt = 6;
+	//TODO: Read from Config...
 
 	private ConnectionManager botManager;
 	private Session botSession;
