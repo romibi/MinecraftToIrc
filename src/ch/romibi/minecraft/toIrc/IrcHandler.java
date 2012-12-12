@@ -74,7 +74,7 @@ public class IrcHandler implements IRCEventListener {
 			e.getSession().join(channel);
 		} else if (e.getType() == Type.CHANNEL_MESSAGE) {
 			MessageEvent me = (MessageEvent) e;
-			if(e.getSession().equals(botSession) && !sessions.containsKey(me.getNick())){
+			if(e.getSession().equals(botSession) && sessions != null && !sessions.containsKey(me.getNick())){
 				parseChannelMessage(me);
 				McToIrc.sendToMc("<"+me.getNick() + "> " + me.getMessage());
 			}
