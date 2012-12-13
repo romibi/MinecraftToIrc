@@ -5,7 +5,7 @@ import jerklib.events.MessageEvent;
 
 public class EnableCaveMapping extends AbstractKeywordEvent {
 	
-	protected String keyword = "enCave";
+	protected String keyword = "encave";
 	
 	@Override
 	protected void doEvent(MessageEvent me) {

@@ -8,7 +8,7 @@ public abstract class AbstractKeywordEvent implements MessageParser {
 	
 	@Override
 	public void parse(MessageEvent me) {
-		if(me.getMessage().toLowerCase().equals("."+keyword)) {
+		if(me.getMessage().toLowerCase().equals("."+keyword.toLowerCase())) {
 			doEvent(me);
 		}
 	}
