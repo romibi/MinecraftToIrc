@@ -14,15 +14,8 @@ public class McHandler extends Thread{
 	
 	private static Process mcProcess;
 	private BufferedWriter mcWriter;
-	private static Properties configFile;
 
 	public McHandler() {
-		configFile = new Properties();
-		try {
-			configFile.load(new FileInputStream("config.properties"));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 		startMc();
 	}
 	
@@ -67,10 +60,10 @@ public class McHandler extends Thread{
 	
 	private static void startMc() {
 		ProcessBuilder pb = null;
-		if (configFile.getProperty("nogui").equals("true")) {
-			pb = new ProcessBuilder("java", configFile.getProperty("xmx"), configFile.getProperty("xms"), "-jar", configFile.getProperty("serverFile"), "nogui");
+		if (McToIrc.configFile.getProperty("nogui").equals("true")) {
+			pb = new ProcessBuilder("java", "-Xmx"+McToIrc.configFile.getProperty("xmx")+"M", "-Xms"+McToIrc.configFile.getProperty("xms"), "-jar", McToIrc.configFile.getProperty("serverFile"), "nogui");
 		} else {
-			pb = new ProcessBuilder("java", configFile.getProperty("xmx"), configFile.getProperty("xms"), "-jar", configFile.getProperty("serverFile"));
+			pb = new ProcessBuilder("java", "-Xmx"+McToIrc.configFile.getProperty("xmx")+"M", "-Xms"+McToIrc.configFile.getProperty("xms"), "-jar", McToIrc.configFile.getProperty("serverFile"));
 		}
 		
 		try {
@@ -81,7 +74,7 @@ public class McHandler extends Thread{
 	}
 	
 	private static void parseOutputFromMc(String cache) {
-		Pattern userMsgPattern = Pattern.compile(".*\\[INFO]\\W<(.*)\\>\\W(.*)");
+		Pattern userMsgPattern = Pattern.compile(McToIrc.configFile.getProperty("messageRegex"));
 		Matcher userMsg = userMsgPattern.matcher(cache);
 		if(userMsg.matches()) {
 			String user = userMsg.group(1);
@@ -89,15 +82,15 @@ public class McHandler extends Thread{
 
 			McToIrc.sendToIrcAsUser(user, msg);
 		}
-		
-		Pattern userLoggedInPattern = Pattern.compile("\\d\\d\\d\\d-\\d\\d\\-\\d\\d\\W\\d\\d:\\d\\d\\:\\d\\d\\W\\[.*\\]\\W(.*)\\[.*\\]\\Wlogged\\ in.*"); //TODO: make better regex
-		Matcher userLoggedIn = userLoggedInPattern.matcher(cache);
+		System.err.println(McToIrc.configFile.getProperty("loginRegex"));
+		Pattern userLoggedInPattern = Pattern.compile(McToIrc.configFile.getProperty("loginRegex")); //TODO: make better regex
+		Matcher userLoggedIn = userLoggedInPattern.matcher(cache);		
 		if(userLoggedIn.matches()){
 			String user = userLoggedIn.group(1);
 			McToIrc.userLoggedIn(user);
 		}
 		
-		Pattern userLoggedOutPattern = Pattern.compile("\\d\\d\\d\\d-\\d\\d\\-\\d\\d\\W\\d\\d:\\d\\d\\:\\d\\d\\W\\[.*\\]\\W(.*)\\Wlost\\ connection.*"); //TODO: make better regex
+		Pattern userLoggedOutPattern = Pattern.compile(McToIrc.configFile.getProperty("logoutRegex")); //TODO: make better regex
 		Matcher userLoggedOut = userLoggedOutPattern.matcher(cache);
 		if(userLoggedOut.matches()){
 			String user = userLoggedOut.group(1);

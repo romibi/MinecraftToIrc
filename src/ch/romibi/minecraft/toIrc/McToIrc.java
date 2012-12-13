@@ -1,6 +1,10 @@
 package ch.romibi.minecraft.toIrc;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.Properties;
 
 
 public class McToIrc {
@@ -8,11 +12,18 @@ public class McToIrc {
 	public static IrcHandler irc;
 	public static McHandler mcThread;
 	public static ConsoleHandler console;
+	public static Properties configFile = new Properties();;
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		try {
+			String configFileContent = getConfigFileContents();
+			configFile.load(new StringReader(configFileContent.replace("\\", "\\\\")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		mcThread = new McHandler();
 		mcThread.start();
 		irc = new IrcHandler();
@@ -20,6 +31,20 @@ public class McToIrc {
 		console.start();
 		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 		programmLoop();
+	}
+
+	private static String getConfigFileContents() throws IOException {
+		StringBuffer strContent = new StringBuffer("");
+		FileInputStream fin = null;
+		try {
+			fin = new FileInputStream("config.properties");
+			for (int ch=fin.read(); ch != -1; ch = fin.read()) {
+				strContent.append((char)ch);
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return strContent.toString();
 	}
 
 	private static void programmLoop() {

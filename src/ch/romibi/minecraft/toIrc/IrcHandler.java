@@ -37,22 +37,15 @@ public class IrcHandler implements IRCEventListener {
 	private Map<String,String> usernameMappings;
 	private List<MessageParser> publicParsers;
 	private List<MessageParser> privateParsers;
-	
-	private Properties configFile;
+
 
 	public IrcHandler() {
-		configFile = new Properties();
+		nick = McToIrc.configFile.getProperty("nick");
+		channel = "#"+McToIrc.configFile.getProperty("channel");
+		server = McToIrc.configFile.getProperty("server");
+		usersuffix = McToIrc.configFile.getProperty("usersuffix");
 		try {
-			configFile.load(new FileInputStream("config.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		nick = configFile.getProperty("nick");
-		channel = "#"+configFile.getProperty("channel");
-		server = configFile.getProperty("server");
-		usersuffix = configFile.getProperty("usersuffix");
-		try {
-		trimNicksAt = Integer.parseInt(configFile.getProperty("trimNicksAt"));
+		trimNicksAt = Integer.parseInt(McToIrc.configFile.getProperty("trimNicksAt"));
 		} catch (NumberFormatException e1) {
 			trimNicksAt=6;
 		}
