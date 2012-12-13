@@ -28,3 +28,7 @@ doc
 doc/*
 libsrc
 libsrc/*
+bukkit.yml
+permissions.yml
+help.yml
+craftbukkit*
