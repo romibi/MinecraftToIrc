@@ -2,9 +2,11 @@ package ch.romibi.minecraft.toIrc;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,8 +14,15 @@ public class McHandler extends Thread{
 	
 	private static Process mcProcess;
 	private BufferedWriter mcWriter;
+	private static Properties configFile;
 
 	public McHandler() {
+		configFile = new Properties();
+		try {
+			configFile.load(new FileInputStream("config.properties"));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		startMc();
 	}
 	
@@ -57,8 +66,13 @@ public class McHandler extends Thread{
 	}
 	
 	private static void startMc() {
-		ProcessBuilder pb = new ProcessBuilder("java", "-Xmx1024M", "-Xms1024M", "-jar", "minecraft_server.jar", "nogui");
-		//TODO: move arguments to config
+		ProcessBuilder pb = null;
+		if (configFile.getProperty("nogui").equals("true")) {
+			pb = new ProcessBuilder("java", configFile.getProperty("xmx"), configFile.getProperty("xms"), "-jar", configFile.getProperty("serverFile"), "nogui");
+		} else {
+			pb = new ProcessBuilder("java", configFile.getProperty("xmx"), configFile.getProperty("xms"), "-jar", configFile.getProperty("serverFile"));
+		}
+		
 		try {
 			mcProcess = pb.start();
 		} catch (IOException e) {

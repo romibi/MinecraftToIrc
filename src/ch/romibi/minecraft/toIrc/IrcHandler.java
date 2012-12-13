@@ -1,9 +1,12 @@
 package ch.romibi.minecraft.toIrc;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 
 import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
@@ -20,12 +23,11 @@ import jerklib.listeners.IRCEventListener;
 
 public class IrcHandler implements IRCEventListener {
 	
-	private String nick = "mcServer";
-	private String channel = "#channel";
-	private String server = "localhost";
-	private String usersuffix = "MC";
-	private int trimNicksAt = 6;
-	//TODO: Read from Config...
+	private String nick;
+	private String channel;
+	private String server;
+	private String usersuffix;
+	private int trimNicksAt;
 
 	private ConnectionManager botManager;
 	private Session botSession;
@@ -35,9 +37,25 @@ public class IrcHandler implements IRCEventListener {
 	private Map<String,String> usernameMappings;
 	private List<MessageParser> publicParsers;
 	private List<MessageParser> privateParsers;
+	
+	private Properties configFile;
 
 	public IrcHandler() {
-		
+		configFile = new Properties();
+		try {
+			configFile.load(new FileInputStream("config.properties"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		nick = configFile.getProperty("nick");
+		channel = "#"+configFile.getProperty("channel");
+		server = configFile.getProperty("server");
+		usersuffix = configFile.getProperty("usersuffix");
+		try {
+		trimNicksAt = Integer.parseInt(configFile.getProperty("trimNicksAt"));
+		} catch (NumberFormatException e1) {
+			trimNicksAt=6;
+		}
 		publicParsers = new ArrayList<MessageParser>();
 		privateParsers = new ArrayList<MessageParser>();
 		
