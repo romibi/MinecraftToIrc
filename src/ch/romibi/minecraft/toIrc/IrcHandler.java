@@ -10,6 +10,7 @@ import java.util.Properties;
 import java.util.Map.Entry;
 
 import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
+import ch.romibi.minecraft.toIrc.parsers.DisableCaveMapping;
 import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
 
 import jerklib.ConnectionManager;
@@ -57,6 +58,7 @@ public class IrcHandler implements IRCEventListener {
 		
 		//Private Parsers
 		privateParsers.add(new EnableCaveMapping());
+		privateParsers.add(new DisableCaveMapping());
 		//TODO: Add more Private Parsers
 		
 		/*

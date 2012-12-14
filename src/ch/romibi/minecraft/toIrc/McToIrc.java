@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
+import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
+
 
 public class McToIrc {
 	
@@ -93,6 +95,13 @@ public class McToIrc {
 	public static void userLoggedIn(String user) {
 		if(irc != null) {
 			irc.userLoggedIn(user);
+			if (EnableCaveMapping.users.get(user) == null) {
+				System.err.println("new user: "+user);
+				EnableCaveMapping.users.put(user, false);
+			} else if (EnableCaveMapping.users.get(user) == true) {
+				System.err.println("enabled cavemapping");
+				mcThread.sendToMc("tell "+user+" 񍦾�1");
+			}
 		}
 	}
 

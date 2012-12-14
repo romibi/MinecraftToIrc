@@ -1,12 +1,16 @@
 package ch.romibi.minecraft.toIrc.parsers;
 
-import ch.romibi.minecraft.toIrc.McToIrc;
+import java.util.HashMap;
+
 import jerklib.events.MessageEvent;
+import ch.romibi.minecraft.toIrc.McToIrc;
 
 public class EnableCaveMapping extends AbstractKeywordEvent {
 
 	private String keyword = "encave";
-
+	public String user; 
+	public static HashMap<String, Boolean> users = new HashMap<String, Boolean>();
+	
 	public EnableCaveMapping() {
 		super.setKeyword(keyword);
 	}
@@ -14,12 +18,10 @@ public class EnableCaveMapping extends AbstractKeywordEvent {
 	
 	@Override
 	protected void doEvent(MessageEvent me) {
-		System.out.println("trololol");
-		if(McToIrc.irc.convertUsernameToMc(me.getNick()) == null) {
-			me.getSession().sayPrivate(me.getNick(), "Sorry! This command is only aviable for Minecraft-Users!");
-		} else {
-			McToIrc.sendCommandToMc("tell "+McToIrc.irc.convertUsernameToMc(me.getNick())+" not yet implemented");
-		}
+		user = me.getNick();
+		users.put(user, true);
+		me.getSession().sayPrivate(user, "Cave-Mapping will be enabled after relog in Minecraft");
+		McToIrc.sendCommandToMc("tell "+user+" Cave-Mapping will be enabled after relog");
 	}
 
 }

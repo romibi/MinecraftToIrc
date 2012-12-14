@@ -82,7 +82,6 @@ public class McHandler extends Thread{
 
 			McToIrc.sendToIrcAsUser(user, msg);
 		}
-		System.err.println(McToIrc.configFile.getProperty("loginRegex"));
 		Pattern userLoggedInPattern = Pattern.compile(McToIrc.configFile.getProperty("loginRegex")); //TODO: make better regex
 		Matcher userLoggedIn = userLoggedInPattern.matcher(cache);		
 		if(userLoggedIn.matches()){
