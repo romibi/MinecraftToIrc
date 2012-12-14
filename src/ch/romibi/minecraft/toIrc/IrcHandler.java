@@ -1,17 +1,10 @@
 package ch.romibi.minecraft.toIrc;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
-
-import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
-import ch.romibi.minecraft.toIrc.parsers.DisableCaveMapping;
-import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
 
 import jerklib.ConnectionManager;
 import jerklib.Profile;
@@ -21,6 +14,9 @@ import jerklib.events.IRCEvent.Type;
 import jerklib.events.JoinCompleteEvent;
 import jerklib.events.MessageEvent;
 import jerklib.listeners.IRCEventListener;
+import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
+import ch.romibi.minecraft.toIrc.parsers.DisableCaveMapping;
+import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
 
 public class IrcHandler implements IRCEventListener {
 	

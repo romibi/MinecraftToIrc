@@ -7,7 +7,7 @@ import ch.romibi.minecraft.toIrc.McToIrc;
 
 public class EnableCaveMapping extends AbstractKeywordEvent {
 
-	private String keyword = "encave";
+	protected String keyword = "encave";
 	public String user; 
 	public static HashMap<String, Boolean> users = new HashMap<String, Boolean>();
 	

@@ -7,7 +7,7 @@ import ch.romibi.minecraft.toIrc.McToIrc;
 
 public class DisableCaveMapping extends AbstractKeywordEvent {
 
-	private String keyword = "discave";
+	protected String keyword = "discave";
 	public String user; 
 	
 	public DisableCaveMapping() {
