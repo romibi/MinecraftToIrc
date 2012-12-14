@@ -16,7 +16,7 @@ public abstract class AbstractKeywordMethod implements MessageParser {
 	public void parse(MessageEvent me) {
 		String[] words = me.getMessage().split("\\ ",2);
 
-		if (words[0].toLowerCase().equals(McToIrc.configFile.getProperty("botCommandMarker") + keyword)) {
+		if (words[0].toLowerCase().equals(McToIrc.configFile.getProperty("botCommandMarker") + keyword.toLowerCase())) {
 			doEvent(me);
 		}
 	}
