@@ -14,11 +14,7 @@ public abstract class AbstractKeywordEvent implements MessageParser {
 	
 	@Override
 	public void parse(MessageEvent me) {
-<<<<<<< HEAD
-		if(me.getMessage().toLowerCase().equals("."+keyword.toLowerCase())) {
-=======
 		if (me.getMessage().toLowerCase().equals(McToIrc.configFile.getProperty("botCommandMarker")+keyword)) {
->>>>>>> Moved Message Patterns to Config File & fixed KeywordEvent
 			doEvent(me);
 		}
 	}
