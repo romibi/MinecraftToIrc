@@ -2,11 +2,9 @@ package ch.romibi.minecraft.toIrc;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,14 +80,14 @@ public class McHandler extends Thread{
 
 			McToIrc.sendToIrcAsUser(user, msg);
 		}
-		Pattern userLoggedInPattern = Pattern.compile(McToIrc.configFile.getProperty("loginRegex")); //TODO: make better regex
+		Pattern userLoggedInPattern = Pattern.compile(McToIrc.configFile.getProperty("loginRegex"));
 		Matcher userLoggedIn = userLoggedInPattern.matcher(cache);		
 		if(userLoggedIn.matches()){
 			String user = userLoggedIn.group(1);
 			McToIrc.userLoggedIn(user);
 		}
 		
-		Pattern userLoggedOutPattern = Pattern.compile(McToIrc.configFile.getProperty("logoutRegex")); //TODO: make better regex
+		Pattern userLoggedOutPattern = Pattern.compile(McToIrc.configFile.getProperty("logoutRegex"));
 		Matcher userLoggedOut = userLoggedOutPattern.matcher(cache);
 		if(userLoggedOut.matches()){
 			String user = userLoggedOut.group(1);

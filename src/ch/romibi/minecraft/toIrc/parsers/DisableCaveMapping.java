@@ -1,7 +1,5 @@
 package ch.romibi.minecraft.toIrc.parsers;
 
-import java.util.HashMap;
-
 import jerklib.events.MessageEvent;
 import ch.romibi.minecraft.toIrc.McToIrc;
 

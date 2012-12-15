@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
-import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
 
 
 public class McToIrc {
@@ -14,7 +13,7 @@ public class McToIrc {
 	public static IrcHandler irc;
 	public static McHandler mcThread;
 	public static ConsoleHandler console;
-	public static Properties configFile = new Properties();;
+	public static Properties configFile = new Properties();
 
 	/**
 	 * @param args
