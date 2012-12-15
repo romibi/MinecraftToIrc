@@ -9,17 +9,15 @@ import java.util.Map.Entry;
 import jerklib.ConnectionManager;
 import jerklib.Profile;
 import jerklib.Session;
-import jerklib.events.IRCEvent;
-import jerklib.events.IRCEvent.Type;
-import jerklib.events.JoinCompleteEvent;
-import jerklib.events.MessageEvent;
+import jerklib.events.*;
+import jerklib.events.IRCEvent.*;
 import jerklib.listeners.IRCEventListener;
-import ch.romibi.minecraft.toIrc.interfaces.MessageParser;
-import ch.romibi.minecraft.toIrc.parsers.DisableCaveMapping;
-import ch.romibi.minecraft.toIrc.parsers.EnableCaveMapping;
+import ch.romibi.minecraft.toIrc.enums.*;
+import ch.romibi.minecraft.toIrc.interfaces.*;
+import ch.romibi.minecraft.toIrc.parsers.*;
 
 public class IrcHandler implements IRCEventListener {
-	
+
 	private String nick;
 	private String channel;
 	private String server;
@@ -28,23 +26,21 @@ public class IrcHandler implements IRCEventListener {
 
 	private ConnectionManager botManager;
 	private Session botSession;
-	
-	private Map<String,Session> sessions;
-	private Map<String,ConnectionManager> managers;
-	private Map<String,String> usernameMappings;
-	private List<MessageParser> publicParsers;
-	private List<MessageParser> privateParsers;
+
+	private Map<String, Session> sessions;
+	private Map<String, ConnectionManager> managers;
+	private Map<String, String> usernameMappings;
 
 
 	public IrcHandler() {
 		nick = McToIrc.configFile.getProperty("nick");
-		channel = "#"+McToIrc.configFile.getProperty("channel");
+		channel = "#" + McToIrc.configFile.getProperty("channel");
 		server = McToIrc.configFile.getProperty("server");
 		usersuffix = McToIrc.configFile.getProperty("usersuffix");
 		try {
-		trimNicksAt = Integer.parseInt(McToIrc.configFile.getProperty("trimNicksAt"));
+			trimNicksAt = Integer.parseInt(McToIrc.configFile.getProperty("trimNicksAt"));
 		} catch (NumberFormatException e1) {
-			trimNicksAt=6;
+			trimNicksAt = 6;
 		}
 		publicParsers = new ArrayList<MessageParser>();
 		privateParsers = new ArrayList<MessageParser>();
@@ -57,6 +53,7 @@ public class IrcHandler implements IRCEventListener {
 		privateParsers.add(new DisableCaveMapping());
 		//TODO: Add more Private Parsers
 		
+
 		/*
 		 * ConnectionManager takes a Profile to use for new connections.
 		 */
@@ -88,7 +85,7 @@ public class IrcHandler implements IRCEventListener {
 				parseChannelMessage(me);
 				McToIrc.sendToMc("<"+me.getNick() + "> " + me.getMessage());
 			}
-		} else if(e.getType() == Type.PRIVATE_MESSAGE) {
+		} else if (e.getType() == Type.PRIVATE_MESSAGE) {
 			MessageEvent me = (MessageEvent) e;
 			if(e.getSession().equals(botSession)) {
 				parseBotRequeset(me);
@@ -97,7 +94,6 @@ public class IrcHandler implements IRCEventListener {
 			}
 		} else if (e.getType() == Type.JOIN_COMPLETE && e.getSession().equals(botSession)) {
 			JoinCompleteEvent jce = (JoinCompleteEvent) e;
-			/* say hello */
 			jce.getChannel().say("MC-Server is Starting");
 		} else {
 			System.out.println(e.getType() + " " + e.getRawEventData());
@@ -118,25 +114,24 @@ public class IrcHandler implements IRCEventListener {
 	}
 
 	public void send(String string) {
-		//manager.getSessions().get(0).sayChannel(manager.getSessions().get(0).getChannel(nick), string);
-		if(botSession != null && botSession.getChannel(channel) != null) {
+		if (botSession != null && botSession.getChannel(channel) != null) {
 			botSession.sayChannel(botSession.getChannel(channel), string);
 		}
 	}
-	
+
 	public Session getSessionForUser(String user) {
 		user = convertUsernameToIrc(user);
-		if(sessions == null) {
+		if (sessions == null) {
 			sessions = new HashMap<String, Session>();
 		}
-		if(sessions.get(user) != null) {
+		if (sessions.get(user) != null) {
 			return sessions.get(user);
 		} else {
 			ConnectionManager tempmanager;
-			if(managers == null) {
+			if (managers == null) {
 				managers = new HashMap<String, ConnectionManager>();
 			}
-			if(managers.get(user) != null) {
+			if (managers.get(user) != null) {
 				tempmanager = managers.get(user);
 			} else {
 				tempmanager = new ConnectionManager(new Profile(user));
@@ -152,7 +147,7 @@ public class IrcHandler implements IRCEventListener {
 	public void userLoggedIn(String user) {
 		getSessionForUser(user);
 	}
-	
+
 	public void sayAsUser(String user, String msg) {
 		getSessionForUser(user).sayChannel(getSessionForUser(user).getChannel(channel), msg);
 	}
@@ -165,26 +160,26 @@ public class IrcHandler implements IRCEventListener {
 		sessions.get(convertUsernameToIrc(user)).close("logged out");
 		sessions.remove(convertUsernameToIrc(user));
 	}
-	
+
 	public String convertUsernameToIrc(String username) {
-		if(usernameMappings == null) {
+		if (usernameMappings == null) {
 			usernameMappings = new HashMap<String, String>();
 		}
-		if(usernameMappings.containsKey(username)) {
+		if (usernameMappings.containsKey(username)) {
 			return usernameMappings.get(username);
 		} else {
-			usernameMappings.put(username, username.substring(0, trimNicksAt)+usersuffix);
-			return username.substring(0, trimNicksAt)+usersuffix;
+			usernameMappings.put(username, username.substring(0, trimNicksAt) + usersuffix);
+			return username.substring(0, trimNicksAt) + usersuffix;
 		}
 	}
-	
+
 	public String convertUsernameToMc(String username) {
-		if(usernameMappings == null) {
+		if (usernameMappings == null) {
 			return null;
 		}
-		if(usernameMappings.containsValue(username)) {
+		if (usernameMappings.containsValue(username)) {
 			for (Entry<String, String> entry : usernameMappings.entrySet()) {
-				if(entry.getValue().equals(username)){
+				if (entry.getValue().equals(username)) {
 					return entry.getKey();
 				}
 			}
@@ -193,7 +188,7 @@ public class IrcHandler implements IRCEventListener {
 	}
 
 	public void stop() {
-		if(sessions != null && sessions.values() != null) {
+		if (sessions != null && sessions.values() != null) {
 			for (Session session : sessions.values()) {
 				session.close("Stopping Minecraft-Server");
 			}
@@ -201,13 +196,13 @@ public class IrcHandler implements IRCEventListener {
 		sessions = null;
 		botSession.close("Stopping Minecraft-Server");
 		botSession = null;
-		
-		if(managers != null && managers.values() != null) { 
-			for(ConnectionManager manager : managers.values()){
+
+		if (managers != null && managers.values() != null) {
+			for (ConnectionManager manager : managers.values()) {
 				manager.quit();
 			}
 		}
-		
+
 		botManager.quit();
 	}
 
