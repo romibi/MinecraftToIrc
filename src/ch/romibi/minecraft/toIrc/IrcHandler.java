@@ -83,34 +83,19 @@ public class IrcHandler implements IRCEventListener {
 		for (AccessType accessType : neededAccessTypes) {
 			accesstypeslist.add(accessType);
 		}
-		
-		System.err.println("REGISTERING "+parser.getClass().toString());
-
 		parsers.put(parser, accesstypeslist);
 	}
 
 	public void parseIfAccess(IRCEvent e) {
-		System.out.println("Parse If Access");
 		Iterator<Entry<MessageParser, List<AccessType>>> it = parsers.entrySet().iterator();
 		
-		System.err.println(parsers.size());
-		
-		for(MessageParser parser : parsers.keySet()) {
-			System.err.println(parser.getClass().toString());
-		}
-		
 		while (it.hasNext()) {
-			System.out.println("in Itteratttootoor");
 			Entry<MessageParser, List<AccessType>> entry = (Entry<MessageParser, List<AccessType>>) it.next();
 
 			ArrayList<AccessType> list = getAviableAccessTypesFromIRCEvent(e);
 			
-			System.out.print("Message Parsed by "+entry.getKey().getClass().toString()+"? ");
 			if (list.containsAll(entry.getValue())) {
 				entry.getKey().parse(e);
-				System.out.println("YES!");
-			} else {
-				System.out.println("NO!");
 			}
 
 			//it.remove(); // avoids a ConcurrentModificationException

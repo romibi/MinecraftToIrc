@@ -33,10 +33,7 @@ public class McHandler extends Thread{
 				}
 				try {
 					if(mcProcess.exitValue() == 0) {
-						System.out.println(mcProcess.exitValue());
 						exit = true;
-					}else {
-						System.out.println(mcProcess.exitValue());
 					}
 				} catch (IllegalThreadStateException e) {
 					
@@ -97,7 +94,6 @@ public class McHandler extends Thread{
 	}
 	
 	public void sendToMc(String string) {
-		System.out.println("Writing "+string);
 		try {
 			mcWriter.append(string);
 			mcWriter.newLine();
