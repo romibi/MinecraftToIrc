@@ -1,7 +1,10 @@
 package ch.romibi.minecraft.toIrc.interfaces;
 
-import jerklib.events.MessageEvent;
+import java.util.List;
+
+import jerklib.events.IRCEvent;
 
 public interface MessageParser {
-	public void parse(MessageEvent me);
+	public void parse(IRCEvent e);
+	public void addToParserList(List<MessageParser> list);
 }

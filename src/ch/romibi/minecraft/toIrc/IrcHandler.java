@@ -2,6 +2,7 @@ package ch.romibi.minecraft.toIrc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,10 @@ public class IrcHandler implements IRCEventListener {
 	private Map<String, ConnectionManager> managers;
 	private Map<String, String> usernameMappings;
 
+	private Map<MessageParser, List<AccessType>> parsers = new HashMap<MessageParser, List<AccessType>>();
+
+	//private List<MessageParser> publicParsers;
+	//private List<MessageParser> privateParsers;
 
 	public IrcHandler() {
 		nick = McToIrc.configFile.getProperty("nick");
@@ -42,16 +47,14 @@ public class IrcHandler implements IRCEventListener {
 		} catch (NumberFormatException e1) {
 			trimNicksAt = 6;
 		}
-		publicParsers = new ArrayList<MessageParser>();
-		privateParsers = new ArrayList<MessageParser>();
 		
-		//Public Parsers
-		//TODO: Add more Public Parsers
+		//Parsers
+//		registerParser(new EnableCaveMapping(), AccessType.PRIVATE, AccessType.OP);
+//		registerParser(new DisableCaveMapping(), AccessType.PRIVATE, AccessType.OP);
+		registerParser(new EnableCaveMapping(), AccessType.PRIVATE);
+		registerParser(new DisableCaveMapping(), AccessType.PRIVATE);
+		//TODO: Add more Parsers
 		
-		//Private Parsers
-		privateParsers.add(new EnableCaveMapping());
-		privateParsers.add(new DisableCaveMapping());
-		//TODO: Add more Private Parsers
 		
 
 		/*
@@ -72,45 +75,112 @@ public class IrcHandler implements IRCEventListener {
 		 * from a connected IRC server.
 		 */
 		botSession.addIRCEventListener(this);
+
+	}
+
+	public void registerParser(MessageParser parser, AccessType... neededAccessTypes) {
+		ArrayList<AccessType> accesstypeslist = new ArrayList<AccessType>();
+		for (AccessType accessType : neededAccessTypes) {
+			accesstypeslist.add(accessType);
+		}
 		
+		System.err.println("REGISTERING "+parser.getClass().toString());
+
+		parsers.put(parser, accesstypeslist);
+	}
+
+	public void parseIfAccess(IRCEvent e) {
+		System.out.println("Parse If Access");
+		Iterator<Entry<MessageParser, List<AccessType>>> it = parsers.entrySet().iterator();
+		
+		System.err.println(parsers.size());
+		
+		for(MessageParser parser : parsers.keySet()) {
+			System.err.println(parser.getClass().toString());
+		}
+		
+		while (it.hasNext()) {
+			System.out.println("in Itteratttootoor");
+			Entry<MessageParser, List<AccessType>> entry = (Entry<MessageParser, List<AccessType>>) it.next();
+
+			ArrayList<AccessType> list = getAviableAccessTypesFromIRCEvent(e);
+			
+			System.out.print("Message Parsed by "+entry.getKey().getClass().toString()+"? ");
+			if (list.containsAll(entry.getValue())) {
+				entry.getKey().parse(e);
+				System.out.println("YES!");
+			} else {
+				System.out.println("NO!");
+			}
+
+			//it.remove(); // avoids a ConcurrentModificationException
+		}
+	}
+
+	private ArrayList<AccessType> getAviableAccessTypesFromIRCEvent(IRCEvent e) {
+		ArrayList<AccessType> list = new ArrayList<AccessType>();
+		
+		if(e.getType() == Type.CHANNEL_MESSAGE) {
+			list.add(AccessType.PUBLIC);
+		}
+		
+		if(e.getType() == Type.PRIVATE_MESSAGE) {
+			list.add(AccessType.PRIVATE);
+		}
+		
+		if(getNickFromIRCEvent(e) != null && convertUsernameToMc(getNickFromIRCEvent(e)) == null) {
+			list.add(AccessType.IRC);
+		} else if(getNickFromIRCEvent(e) != null){
+			list.add(AccessType.MC);
+		}
+		
+		
+		//TODO OP-AccessType...
+		return list;
+	}
+
+	private String getNickFromIRCEvent(IRCEvent e) {
+		switch (e.getType()) {
+			case PRIVATE_MESSAGE:
+			case CHANNEL_MESSAGE:
+				return ((MessageEvent) e).getNick();
+			case QUIT:
+				return ((QuitEvent) e).getNick();
+			case PART:
+				return ((PartEvent) e).getWho();
+			case JOIN:
+				return ((JoinEvent) e).getNick();
+			case KICK_EVENT:
+				return ((KickEvent) e).getWho();
+			case AWAY_EVENT:
+				return ((AwayEvent) e).getNick();
+			default:
+				return null;
+		}
 	}
 
 	@Override
 	public void receiveEvent(IRCEvent e) {
+		parseIfAccess(e);
 		if (e.getType() == Type.CONNECT_COMPLETE) {
 			e.getSession().join(channel);
 		} else if (e.getType() == Type.CHANNEL_MESSAGE) {
 			MessageEvent me = (MessageEvent) e;
-			if(e.getSession().equals(botSession) && sessions != null && !sessions.containsKey(me.getNick())){
-				parseChannelMessage(me);
-				McToIrc.sendToMc("<"+me.getNick() + "> " + me.getMessage());
+			if (e.getSession().equals(botSession) && sessions != null && !sessions.containsKey(me.getNick())) {
+				McToIrc.sendToMc("<" + me.getNick() + "> " + me.getMessage());
 			}
 		} else if (e.getType() == Type.PRIVATE_MESSAGE) {
 			MessageEvent me = (MessageEvent) e;
-			if(e.getSession().equals(botSession)) {
-				parseBotRequeset(me);
-			} else {
-				McToIrc.sendCommandToMc("tell "+convertUsernameToMc(me.getSession().getNick())+" "+me.getNick()+" from IRC whispers: "+me.getMessage());
+			if (!e.getSession().equals(botSession)) {
+				McToIrc.sendCommandToMc("tell " + convertUsernameToMc(me.getSession().getNick()) + " " + me.getNick() + " from IRC whispers: " + me.getMessage());
 			}
 		} else if (e.getType() == Type.JOIN_COMPLETE && e.getSession().equals(botSession)) {
 			JoinCompleteEvent jce = (JoinCompleteEvent) e;
 			jce.getChannel().say("MC-Server is Starting");
 		} else {
-			System.out.println(e.getType() + " " + e.getRawEventData());
+			System.out.println("IRC: "+e.getType() + " " + e.getRawEventData());
 		}
 
-	}
-	
-	private void parseChannelMessage(MessageEvent me) {
-		for (MessageParser parser : publicParsers) {
-			parser.parse(me);
-		}
-	}
-
-	private void parseBotRequeset(MessageEvent me) {
-		for (MessageParser parser : privateParsers) {
-			parser.parse(me);
-		}
 	}
 
 	public void send(String string) {
