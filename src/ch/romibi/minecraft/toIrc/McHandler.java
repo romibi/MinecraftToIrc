@@ -90,6 +90,14 @@ public class McHandler extends Thread{
 			McToIrc.userLoggedOut(user);
 		}
 		
+//		Pattern userMeActionPattern = Pattern.compile(McToIrc.configFile.getProperty("meActionRegex"));
+//		Matcher userMeAction = userMeActionPattern.matcher(cache);
+//		if(userMeAction.matches()){
+//			String user = userMeAction.group(1);
+//			String msg = userMeAction.group(2);
+//			McToIrc.userMeAction(user, msg);
+//		}
+		
 		System.out.println(cache);
 	}
 	

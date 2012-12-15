@@ -162,6 +162,10 @@ public class IrcHandler implements IRCEventListener {
 		} else if (e.getType() == Type.JOIN_COMPLETE && e.getSession().equals(botSession)) {
 			JoinCompleteEvent jce = (JoinCompleteEvent) e;
 			jce.getChannel().say("MC-Server is Starting");
+		} else if(e.getSession().equals(botSession) && e.getType() == Type.JOIN && convertUsernameToMc(getNickFromIRCEvent(e)) == null){
+			McToIrc.sendToMc("User "+((JoinEvent)e).getNick()+" joined Chat!");
+		} else if(e.getSession().equals(botSession) && (e.getType() == Type.QUIT || e.getType() == Type.PART) && convertUsernameToMc(getNickFromIRCEvent(e)) == null){
+			McToIrc.sendToMc("User "+getNickFromIRCEvent(e)+" left Chat!");
 		} else {
 			System.out.println("IRC: "+e.getType() + " " + e.getRawEventData());
 		}
