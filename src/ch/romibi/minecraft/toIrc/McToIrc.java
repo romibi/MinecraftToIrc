@@ -4,8 +4,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
+import ch.romibi.minecraft.toIrc.enums.EventType;
+import ch.romibi.minecraft.toIrc.interfaces.EventHandler;
 
 
 public class McToIrc {
@@ -14,6 +18,15 @@ public class McToIrc {
 	public static McHandler mcThread;
 	public static ConsoleHandler console;
 	public static Properties configFile = new Properties();
+	
+
+	
+	private static List<EventHandler> loggonListener = new ArrayList<EventHandler>();
+	private static List<EventHandler> loggoutListener = new ArrayList<EventHandler>();
+	private static List<EventHandler> messageListener = new ArrayList<EventHandler>();
+	private static List<EventHandler> meActionListener = new ArrayList<EventHandler>();
+	private static List<EventHandler> userUsedUnknownCommandListener = new ArrayList<EventHandler>();
+	private static List<EventHandler> userTeleportedListener = new ArrayList<EventHandler>();
 
 	/**
 	 * @param args
@@ -71,11 +84,11 @@ public class McToIrc {
 		}
 	}
 
-	public static void sendToIrc(String string) {
-		if(irc!=null) {
-			irc.send(string);
-		}
-	}
+//	public static void sendToIrc(String string) {
+//		if(irc!=null) {
+//			irc.send(string);
+//		}
+//	}
 	
 	public static void sendCommandToMc(String string) {
 		mcThread.sendToMc(string);
@@ -85,27 +98,81 @@ public class McToIrc {
 		mcThread.sendToMc("me IRC: "+string);
 	}
 
-	public static void sendToIrcAsUser(String user, String msg) {
-		if(irc!=null) {
-			irc.sayAsUser(user, msg);
-		}
+//	public static void sendToIrcAsUser(String user, String msg) {
+//		if(irc!=null) {
+//			irc.sayAsUser(user, msg);
+//		}
+//	}
+	
+	
+	// Register EventHandlers
+	
+	public static void registerLogginListener(EventHandler handler) {
+		loggonListener.add(handler);
 	}
+	
+	public static void registerLoggoutListener(EventHandler handler) {
+		loggoutListener.add(handler);
+	}
+
+	public static void registerMessageListener(EventHandler handler) {
+		messageListener.add(handler);
+	}
+
+	public static void registerMeActionListener(EventHandler handler) {
+		meActionListener.add(handler);
+	}
+
+	public static void registerUserUsedCommandListener(EventHandler handler) {
+		userUsedUnknownCommandListener.add(handler);
+	}
+
+	public static void registerUserTeleportedListener(EventHandler handler) {
+		userTeleportedListener.add(handler);
+	}
+	
+	//Notify EventHandlers
 
 	public static void userLoggedIn(String user) {
 		if(irc != null) {
-			irc.userLoggedIn(user);
-			if (EnableCaveMapping.users.get(user) == null) {
-				System.err.println("new user: "+user);
-				EnableCaveMapping.users.put(user, false);
-			} else if (EnableCaveMapping.users.get(user) == true) {
-				System.err.println("enabled cavemapping");
-				mcThread.sendToMc("tell "+user+" 񍦾�1");
+			irc.userLoggedIn(user); //TODO Do As EventHandler...
+			for (EventHandler handler : loggonListener) {
+				handler.eventAction(EventType.USER_LOGGED_IN, user);
 			}
 		}
 	}
 
 	public static void userLoggedOut(String user) {
-		irc.userLoggedOut(user);
+		irc.userLoggedOut(user); //TODO Do as EventHandler
+		for (EventHandler handler : loggoutListener) {
+			handler.eventAction(EventType.USER_LOGGED_OUT, user);
+		}
+	}
+
+	public static void userMessage(String user, String msg) {
+		irc.sayAsUser(user, msg); //TODO Do as EventHandler
+		for (EventHandler handler : messageListener) {
+			handler.eventAction(EventType.USER_MESSAGE, msg);
+		}
+	}
+	
+	public static void userMeAction(String user, String msg) {
+		irc.send("/me "+msg); //TODO Do as EventHandler
+		for (EventHandler handler : meActionListener) {
+			handler.eventAction(EventType.USER_ME_ACTION, msg);
+		}
+	}
+	
+	public static void userUsedUnknownCommand(String user, String command) {
+		for (EventHandler handler : userUsedUnknownCommandListener) {
+			handler.eventAction(EventType.USER_USED_UNKNOWN_COMMAND, command);
+		}
+	}
+	
+	public static void userTeleported(String user, Integer x, Integer y, Integer z) {
+		for (EventHandler handler : userUsedUnknownCommandListener) {
+			handler.eventAction(EventType.USER_TELEPORTED, x, y, z);
+		}
 	}
 
 }
