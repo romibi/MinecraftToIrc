@@ -37,7 +37,7 @@ public class EnableCaveMapping extends AbstractKeywordEvent implements EventHand
 			users.put(user, false);
 		} else if (EnableCaveMapping.users.get(user) == true) {
 			System.err.println("enabled cavemapping");
-			McToIrc.sendCommandToMc("tell "+user+" �0�0�1�e�f");
+			McToIrc.sendCommandToMc("tell "+user+" �0�0�1�e�f"); //TODO: Correct encoding...
 		}
 	}
 
