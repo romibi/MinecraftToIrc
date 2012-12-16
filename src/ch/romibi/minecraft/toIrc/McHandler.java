@@ -56,9 +56,9 @@ public class McHandler extends Thread{
 	private static void startMc() {
 		ProcessBuilder pb = null;
 		if (McToIrc.configFile.getProperty("nogui").equals("true")) {
-			pb = new ProcessBuilder("java", "-Xmx"+McToIrc.configFile.getProperty("xmx")+"M", "-Xms"+McToIrc.configFile.getProperty("xms"), "-jar", McToIrc.configFile.getProperty("serverFile"), "nogui");
+			pb = new ProcessBuilder("java", "-Xmx"+McToIrc.configFile.getProperty("xmx"), "-Xms"+McToIrc.configFile.getProperty("xms"), "-jar", McToIrc.configFile.getProperty("serverFile"), "nogui");
 		} else {
-			pb = new ProcessBuilder("java", "-Xmx"+McToIrc.configFile.getProperty("xmx")+"M", "-Xms"+McToIrc.configFile.getProperty("xms"), "-jar", McToIrc.configFile.getProperty("serverFile"));
+			pb = new ProcessBuilder("java", "-Xmx"+McToIrc.configFile.getProperty("xmx"), "-Xms"+McToIrc.configFile.getProperty("xms"), "-jar", McToIrc.configFile.getProperty("serverFile"));
 		}
 		
 		try {
