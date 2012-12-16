@@ -227,8 +227,14 @@ public class IrcHandler implements IRCEventListener {
 		if (usernameMappings.containsKey(username)) {
 			return usernameMappings.get(username);
 		} else {
-			usernameMappings.put(username, username.substring(0, trimNicksAt) + usersuffix);
-			return username.substring(0, trimNicksAt) + usersuffix;
+			String trimmedUsername;
+			if(username.length()>trimNicksAt) { //TODO: Test if +/- 1 ...
+				trimmedUsername = username.substring(0, trimNicksAt);
+			} else {
+				trimmedUsername = username;
+			}
+			usernameMappings.put(username, trimmedUsername + usersuffix);
+			return trimmedUsername + usersuffix;
 		}
 	}
 
