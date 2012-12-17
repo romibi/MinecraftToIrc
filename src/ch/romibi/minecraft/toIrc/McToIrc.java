@@ -157,7 +157,7 @@ public class McToIrc {
 	}
 	
 	public static void userMeAction(String user, String msg) {
-		irc.send("/me "+msg); //TODO Do as EventHandler
+		irc.sendAsUser(user, "/me "+msg); //TODO Do as EventHandler
 		for (EventHandler handler : meActionListener) {
 			handler.eventAction(EventType.USER_ME_ACTION, msg);
 		}
@@ -173,6 +173,11 @@ public class McToIrc {
 		for (EventHandler handler : userUsedUnknownCommandListener) {
 			handler.eventAction(EventType.USER_TELEPORTED, x, y, z);
 		}
+	}
+
+	public static boolean isOp(String nick) {
+			// TODO Check if User is OP
+		return false;
 	}
 
 }

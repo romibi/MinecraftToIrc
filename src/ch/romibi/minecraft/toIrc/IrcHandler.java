@@ -24,6 +24,8 @@ public class IrcHandler implements IRCEventListener {
 	private String server;
 	private String usersuffix;
 	private int trimNicksAt;
+	
+	private UserDisplayMode userDisplayMode = UserDisplayMode.SINGLE;
 
 	private ConnectionManager botManager;
 	private Session botSession;
@@ -46,6 +48,14 @@ public class IrcHandler implements IRCEventListener {
 			trimNicksAt = Integer.parseInt(McToIrc.configFile.getProperty("trimNicksAt"));
 		} catch (NumberFormatException e1) {
 			trimNicksAt = 6;
+		}
+		
+		if (McToIrc.configFile.getProperty("userDisplayMode").toUpperCase().equals("SINGLE")) {
+			userDisplayMode = UserDisplayMode.SINGLE;
+		} else if(McToIrc.configFile.getProperty("userDisplayMode").toUpperCase().equals("MULTI")) {
+			userDisplayMode = UserDisplayMode.MULTI;
+		} else if(McToIrc.configFile.getProperty("userDisplayMode").toUpperCase().equals("MULTIOP")) {
+			userDisplayMode = UserDisplayMode.MULTIOP;
 		}
 		
 		//Parsers
@@ -77,6 +87,8 @@ public class IrcHandler implements IRCEventListener {
 		botSession.addIRCEventListener(this);
 
 	}
+	
+// Parser things
 
 	public void registerParser(MessageParser parser, AccessType... neededAccessTypes) {
 		ArrayList<AccessType> accesstypeslist = new ArrayList<AccessType>();
@@ -119,30 +131,13 @@ public class IrcHandler implements IRCEventListener {
 			list.add(AccessType.MC);
 		}
 		
-		
-		//TODO OP-AccessType...
+		if(getNickFromIRCEvent(e) != null && McToIrc.isOp(getNickFromIRCEvent(e))) {
+			list.add(AccessType.OP);
+		}
 		return list;
 	}
-
-	private String getNickFromIRCEvent(IRCEvent e) {
-		switch (e.getType()) {
-			case PRIVATE_MESSAGE:
-			case CHANNEL_MESSAGE:
-				return ((MessageEvent) e).getNick();
-			case QUIT:
-				return ((QuitEvent) e).getNick();
-			case PART:
-				return ((PartEvent) e).getWho();
-			case JOIN:
-				return ((JoinEvent) e).getNick();
-			case KICK_EVENT:
-				return ((KickEvent) e).getWho();
-			case AWAY_EVENT:
-				return ((AwayEvent) e).getNick();
-			default:
-				return null;
-		}
-	}
+	
+// Event things
 
 	@Override
 	public void receiveEvent(IRCEvent e) {
@@ -171,15 +166,95 @@ public class IrcHandler implements IRCEventListener {
 		}
 
 	}
+	
+	public void userLoggedIn(String mcUser) {
+		loginUser(mcUser);
+	}
+
+	public void userLoggedOut(String mcUser) {
+		logoutUser(mcUser);
+	}
+
+// Action things as mcUser (Don't Forget to check for userDisplayMode)
+	
+	private void loginUser(String mcUser) {
+		if (userDisplayMode == UserDisplayMode.SINGLE || (userDisplayMode == UserDisplayMode.MULTIOP && !McToIrc.isOp(mcUser))) {
+			send(mcUser +" logged in.");
+		} else if(userDisplayMode == UserDisplayMode.MULTI || (userDisplayMode == UserDisplayMode.MULTIOP && McToIrc.isOp(mcUser))) {
+			getSessionForUser(mcUser);
+		}
+	}
+
+	private void logoutUser(String mcUser) {
+		if (userDisplayMode == UserDisplayMode.SINGLE || (userDisplayMode == UserDisplayMode.MULTIOP && !McToIrc.isOp(mcUser))) {
+			send(mcUser +" logged out.");
+		} else if(userDisplayMode == UserDisplayMode.MULTI || (userDisplayMode == UserDisplayMode.MULTIOP && McToIrc.isOp(mcUser))) {
+			sessions.get(convertUsernameToIrc(mcUser)).close("logged out");
+			sessions.remove(convertUsernameToIrc(mcUser));
+		}
+	}
+	
+	public void sayAsUser(String mcUser, String msg) {
+		if (userDisplayMode == UserDisplayMode.SINGLE || (userDisplayMode == UserDisplayMode.MULTIOP && !McToIrc.isOp(mcUser))) {
+			send("<"+mcUser+"> : "+msg);
+		} else if(userDisplayMode == UserDisplayMode.MULTI || (userDisplayMode == UserDisplayMode.MULTIOP && McToIrc.isOp(mcUser))) {
+			getSessionForUser(mcUser).sayChannel(getSessionForUser(mcUser).getChannel(channel), msg);
+		}
+	}
+	
+	public void sendAsUser(String mcUser, String string) {
+		if (userDisplayMode == UserDisplayMode.SINGLE || (userDisplayMode == UserDisplayMode.MULTIOP && !McToIrc.isOp(mcUser))) {
+			if(string.substring(0, 1).equals("/")) {
+				emulateIrcCommandForEmulatedUser(mcUser, string);
+			} else {
+				System.err.println("Dear Programmer. Please use \"sayAsUser(String mcUser, String msg)\" if it's not a command!");
+			}
+		} else if(userDisplayMode == UserDisplayMode.MULTI || (userDisplayMode == UserDisplayMode.MULTIOP && McToIrc.isOp(mcUser))) {
+			getSessionForUser(mcUser).sayChannel(getSessionForUser(mcUser).getChannel(channel), string);
+		}
+	}
+	
+// Actions
 
 	public void send(String string) {
 		if (botSession != null && botSession.getChannel(channel) != null) {
 			botSession.sayChannel(botSession.getChannel(channel), string);
 		}
 	}
+	
+	private void emulateIrcCommandForEmulatedUser(String mcUser, String string) {
+		String[] words = string.split(" ");
+		if(words[0].equals("/me")) {
+			send("* "+mcUser+" "+string.substring(4));
+		} else { //TODO: emulate more Commands
+			System.err.println("Unrecognized Command to emulate: "+string);
+		}
+	}
 
-	public Session getSessionForUser(String user) {
-		user = convertUsernameToIrc(user);
+// Nick / User things
+
+	private String getNickFromIRCEvent(IRCEvent e) {
+		switch (e.getType()) {
+			case PRIVATE_MESSAGE:
+			case CHANNEL_MESSAGE:
+				return ((MessageEvent) e).getNick();
+			case QUIT:
+				return ((QuitEvent) e).getNick();
+			case PART:
+				return ((PartEvent) e).getWho();
+			case JOIN:
+				return ((JoinEvent) e).getNick();
+			case KICK_EVENT:
+				return ((KickEvent) e).getWho();
+			case AWAY_EVENT:
+				return ((AwayEvent) e).getNick();
+			default:
+				return null;
+		}
+	}
+
+	public Session getSessionForUser(String mcUser) {
+		String user = convertUsernameToIrc(mcUser);
 		if (sessions == null) {
 			sessions = new HashMap<String, Session>();
 		}
@@ -203,54 +278,39 @@ public class IrcHandler implements IRCEventListener {
 		}
 	}
 
-	public void userLoggedIn(String user) {
-		getSessionForUser(user);
-	}
-
-	public void sayAsUser(String user, String msg) {
-		getSessionForUser(user).sayChannel(getSessionForUser(user).getChannel(channel), msg);
-	}
-
-	public void userLoggedOut(String user) {
-		logoutUser(user);
-	}
-
-	private void logoutUser(String user) {
-		sessions.get(convertUsernameToIrc(user)).close("logged out");
-		sessions.remove(convertUsernameToIrc(user));
-	}
-
-	public String convertUsernameToIrc(String username) {
+	public String convertUsernameToIrc(String mcUsername) {
 		if (usernameMappings == null) {
 			usernameMappings = new HashMap<String, String>();
 		}
-		if (usernameMappings.containsKey(username)) {
-			return usernameMappings.get(username);
+		if (usernameMappings.containsKey(mcUsername)) {
+			return usernameMappings.get(mcUsername);
 		} else {
 			String trimmedUsername;
-			if(username.length()>trimNicksAt) { //TODO: Test if +/- 1 ...
-				trimmedUsername = username.substring(0, trimNicksAt);
+			if(mcUsername.length()>trimNicksAt) { //TODO: Test if +/- 1 ...
+				trimmedUsername = mcUsername.substring(0, trimNicksAt);
 			} else {
-				trimmedUsername = username;
+				trimmedUsername = mcUsername;
 			}
-			usernameMappings.put(username, trimmedUsername + usersuffix);
+			usernameMappings.put(mcUsername, trimmedUsername + usersuffix);
 			return trimmedUsername + usersuffix;
 		}
 	}
 
-	public String convertUsernameToMc(String username) {
+	public String convertUsernameToMc(String ircUsername) {
 		if (usernameMappings == null) {
 			return null;
 		}
-		if (usernameMappings.containsValue(username)) {
+		if (usernameMappings.containsValue(ircUsername)) {
 			for (Entry<String, String> entry : usernameMappings.entrySet()) {
-				if (entry.getValue().equals(username)) {
+				if (entry.getValue().equals(ircUsername)) {
 					return entry.getKey();
 				}
 			}
 		}
 		return null;
 	}
+	
+// Other things
 
 	public void stop() {
 		if (sessions != null && sessions.values() != null) {
