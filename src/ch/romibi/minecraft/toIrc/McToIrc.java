@@ -15,9 +15,9 @@ import ch.romibi.minecraft.toIrc.interfaces.ParameteredRunnable;
 
 public class McToIrc {
 	
-	public static IrcHandler irc;
-	public static McHandler mcThread;
-	public static ConsoleHandler console;
+	private static IrcHandler irc;
+	private static McHandler mcThread;
+	private static ConsoleHandler console;
 	public static Properties configFile = new Properties();
 	
 
@@ -42,7 +42,15 @@ public class McToIrc {
 		mcThread = new McHandler();
 		mcThread.start();
 		irc = new IrcHandler();
+		
 		console = new ConsoleHandler();
+		console.setConsoleTextEnteredListener(new ParameteredRunnable<String>() {
+			
+			@Override
+			public void run(String param) {
+				McToIrc.mcThread.sendToMc(param);
+			}
+		});
 		console.start();
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
