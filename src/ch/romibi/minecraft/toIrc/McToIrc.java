@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import ch.romibi.minecraft.toIrc.enums.EventType;
 import ch.romibi.minecraft.toIrc.interfaces.EventHandler;
+import ch.romibi.minecraft.toIrc.interfaces.ParameteredRunnable;
 
 
 public class McToIrc {
@@ -43,7 +44,20 @@ public class McToIrc {
 		irc = new IrcHandler();
 		console = new ConsoleHandler();
 		console.start();
-		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+		
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				if(McToIrc.mcThread.isAlive()) {
+					McToIrc.sendCommandToMc("stop");
+				}
+				McToIrc.irc.stop();
+				try {
+					McToIrc.console.consoleReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		programmLoop();
 	}
 
