@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +22,7 @@ public class McHandler extends Thread{
 		BufferedReader mcReader = new BufferedReader(new InputStreamReader(mcProcess.getErrorStream()));
 		String mcOutputCache = "";
 	
-		mcWriter = new BufferedWriter(new OutputStreamWriter(mcProcess.getOutputStream()));
+		mcWriter = new BufferedWriter(new OutputStreamWriter(mcProcess.getOutputStream(), Charset.forName("MacRoman"))); //TODO: Test on different Systems...
 		boolean exit = false;
 		
 		while (!exit) {
