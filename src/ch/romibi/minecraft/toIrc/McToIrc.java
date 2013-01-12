@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -17,6 +18,7 @@ public class McToIrc {
 	
 	private static IrcHandler irc;
 	private static McHandler mcThread;
+	private static long mcThreadStartTime = 0;
 	private static ConsoleHandler console;
 	public static Properties configFile = new Properties();
 	
@@ -41,6 +43,7 @@ public class McToIrc {
 		}
 		mcThread = new McHandler();
 		mcThread.start();
+		mcThreadStartTime = new Date().getTime();
 		irc = new IrcHandler();
 		
 		console = new ConsoleHandler();
@@ -117,7 +120,9 @@ public class McToIrc {
 	}
 	
 	public static void sendToMc(String string) {
-		mcThread.sendToMc("me IRC: "+string);
+		if(mcThreadStartTime < (new Date().getTime()+10000)) {
+			mcThread.sendToMc("me IRC: "+string);
+		}
 	}
 
 //	public static void sendToIrcAsUser(String user, String msg) {
