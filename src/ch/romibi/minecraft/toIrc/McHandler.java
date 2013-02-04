@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,13 +104,34 @@ public class McHandler extends Thread{
 	}
 	
 	public void sendToMc(String string) {
-		try {
-			mcWriter.append(string);
-			mcWriter.newLine();
-			mcWriter.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
+		ArrayList<String> parts = divideStringToLines(string);
+		
+		for (String part : parts) {
+			try {
+				mcWriter.append(part);
+				mcWriter.newLine();
+				mcWriter.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+
+	private ArrayList<String> divideStringToLines(String string) {
+		ArrayList<String> lines = new ArrayList<String>();
+		String currentLine = "";
+		for (String word : string.split(" ")) {
+			if((currentLine+" "+word).length() > 99) {
+				lines.add(currentLine);
+				currentLine = "";
+			}
+			
+			currentLine += " "+word;
+		}
+		
+		lines.add(currentLine);
+		
+		return lines;
 	}
 	
 }
