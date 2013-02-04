@@ -195,12 +195,28 @@ public class IrcHandler implements IRCEventListener {
 	
 	public void sayAsUser(String mcUser, String msg) {
 		if (userDisplayMode == UserDisplayMode.SINGLE || (userDisplayMode == UserDisplayMode.MULTIOP && !McToIrc.isOp(mcUser))) {
-			send("<"+mcUser+"> : "+msg);
+			if(couldBeBotCommand(msg) == true) {
+				send("<"+mcUser+"> tries IRC (Bot) Command:");
+				send(msg);
+			} else {
+				send("<"+mcUser+">: "+msg);
+			}
 		} else if(userDisplayMode == UserDisplayMode.MULTI || (userDisplayMode == UserDisplayMode.MULTIOP && McToIrc.isOp(mcUser))) {
 			getSessionForUser(mcUser).sayChannel(getSessionForUser(mcUser).getChannel(channel), msg);
 		}
 	}
 	
+	private boolean couldBeBotCommand(String msg) {
+		if(msg.startsWith(".")	// TODO: Move to config...
+				|| msg.startsWith("!") 
+				|| msg.startsWith("?")
+				) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public void sendAsUser(String mcUser, String string) {
 		if (userDisplayMode == UserDisplayMode.SINGLE || (userDisplayMode == UserDisplayMode.MULTIOP && !McToIrc.isOp(mcUser))) {
 			if(string.substring(0, 1).equals("/")) {
